@@ -19,26 +19,9 @@
 
 #include "stages.cuh"
 #include "types.cuh"
+#include "utils.cuh"
 #include <cmath>
 #include <vector>
-
-/*
- * General Purpose:
- *   Clamp an integer index into the valid boundary [lo, hi] (Clamp-to-edge).
- * 
- * Inputs:
- *   - val: Target index to be tested.
- *   - lo: Lower bound (inclusive).
- *   - hi: Upper bound (inclusive).
- * 
- * Outputs:
- *   - Clamped index within [lo, hi].
- */
-static inline int clampInt(int val, int lo, int hi) {
-    if (val < lo) return lo;
-    if (val > hi) return hi;
-    return val;
-}
 
 /*
  * General Purpose:

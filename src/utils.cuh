@@ -101,3 +101,18 @@ void applyHomography(const Homography& H, double x, double y, double& ox, double
 // Mean distance (pixels) between the 4 image corners of a w x h image mapped by
 // `est` and by `gt`. Used for the synthetic-pair correctness check.
 double homographyCornerError(const Homography& est, const Homography& gt, int w, int h);
+
+// -------------------------------------------------------------- small helpers
+/*
+ * General Purpose:
+ *   Clamp an integer index into the valid boundary [lo, hi] (Clamp-to-edge).
+ *
+ * Inputs:
+ *   - val: Target index to be tested.
+ *   - lo: Lower bound (inclusive).
+ *   - hi: Upper bound (inclusive).
+ *
+ * Outputs:
+ *   - Clamped index within [lo, hi].
+ */
+int clampInt(int val, int lo, int hi) ;
