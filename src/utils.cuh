@@ -22,6 +22,11 @@ struct CliOptions {
     int runs    = 5;                     // timed runs (a warm-up run is always done first)
 };
 
+struct DevCliOptions: public CliOptions {
+    int verbose = 0;
+    int step = 0;                        // 0 = all, 1 = stage 1, 2 = stage 2, ...
+}
+
 // Returns false on error (message in `err`; empty err + false means "print usage only").
 bool parseArgs(int argc, char** argv, CliOptions& opt, std::string& err);
 void printUsage(const char* exe);
@@ -29,8 +34,19 @@ void printUsage(const char* exe);
 // ------------------------------------------------------------------- image I/O
 bool loadImage(const std::string& path, Image& img);        // any format stb supports -> RGB8
 bool saveImage(const std::string& path, const Image& img);  // by extension: .png/.jpg/.jpeg/.bmp (default png)
-// All .jpg/.jpeg/.png/.bmp files of `dir`, natural-sorted (img2 < img10).
-bool listImagesInDir(const std::string& dir, std::vector<std::string>& paths);
+
+// ---------------------------------------------------------------------- ???
+#define CHECK(call)\
+{\
+	const cudaError_t error = call;\
+	if (error != cudaSuccess)\
+	{\
+		fprintf(stderr, "Error: %s:%d, ", __FILE__, __LINE__);\
+		fprintf(stderr, "code: %d, reason: %s\n", error,\
+				cudaGetErrorString(error));\
+		exit(EXIT_FAILURE);\
+	}\
+}
 
 // ---------------------------------------------------------------------- timing
 // V0 timer: std::chrono::high_resolution_clock, as required by the project spec.
@@ -41,6 +57,43 @@ struct CpuTimer {
         return std::chrono::duration<double, std::milli>(
                    std::chrono::high_resolution_clock::now() - t0).count();
     }
+};
+
+struct GpuTimer
+{
+	cudaEvent_t start;
+	cudaEvent_t stop;
+
+	GpuTimer()
+	{
+		cudaEventCreate(&start);
+		cudaEventCreate(&stop);
+	}
+
+	~GpuTimer()
+	{
+		cudaEventDestroy(start);
+		cudaEventDestroy(stop);
+	}
+
+	void Start()
+	{
+		cudaEventRecord(start, 0);
+		cudaEventSynchronize(start);
+	}
+
+	void Stop()
+	{
+		cudaEventRecord(stop, 0);
+	}
+
+	float Elapsed()
+	{
+		float elapsed;
+		cudaEventSynchronize(stop);
+		cudaEventElapsedTime(&elapsed, start, stop);
+		return elapsed;
+	}
 };
 
 // ------------------------------------------------------- evaluation (midterm 3.5)
