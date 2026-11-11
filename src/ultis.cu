@@ -3,7 +3,7 @@
 // stb_image_write.h (public domain, Sean Barrett).
 #include "stb_image.h" // declarations only; implementation is in stb_impl.cpp
 #include "stb_image_write.h"
-#include "ultis.h"
+#include "ultis.cuh"
 #include <algorithm>
 #include <cctype>
 #include <cmath>
@@ -11,7 +11,6 @@
 #include <cstdlib>
 #include <cstring>
 #include <filesystem>
-
 
 namespace fs = std::filesystem;
 
