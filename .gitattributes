@@ -1,0 +1,2 @@
+# build.sh must keep LF line endings (CRLF breaks bash, e.g. on Colab)
+*.sh text eol=lf
