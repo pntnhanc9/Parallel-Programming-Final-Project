@@ -4,8 +4,6 @@
  * External sources: none
  *
  * Shared data types and pipeline parameters used by ALL versions (V0, V1, ...).
- * Plain C++ only -- no CUDA includes -- so V0 stays a pure CPU baseline.
- * Changing a struct here affects every module: discuss with the team first.
  */
 #pragma once
 #include <cstdint>
@@ -40,16 +38,20 @@ struct Descriptor { uint32_t w[8] = {0}; };
 struct BriefPair { int8_t x1, y1, x2, y2; };
 
 // A match between keypoint idxA of image A and keypoint idxB of image B.
-// idxA/idxB index the *final* keypoint/descriptor arrays (after border filtering).
+// idxA/idxB index the final keypoint/descriptor arrays (after border filtering).
 struct Match { int idxA = -1, idxB = -1; int dist = 0; };
 
 // 3x3 projective transform, row-major, maps points of image B into image A's frame:
 //   [x' y' w]^T = H [x y 1]^T ,   (x'/w , y'/w) is the position in A.
 struct Homography {
-		double h[9] = {1,0,0, 0,1,0, 0,0,1};
+		double h[9] = {
+			1, 0, 0, 
+			0, 1, 0, 
+			0, 0, 1
+		};
 };
 
-// Every version must use exactly these parameters (fair timing + comparable output).
+// Every version must use exactly these parameters.
 struct Params {
 		// Stage 1: grayscale + separable Gaussian
 		float blurSigma     = 2.0f;
@@ -87,7 +89,7 @@ struct StageTimes {
 		double stageSum() const { double s = 0; for (int i = 0; i < ST_COUNT; ++i) s += ms[i]; return s; }
 };
 
-// Diagnostics of one pair stitch (for the report: "every number comes from an output cell").
+// Diagnostics of one pair stitch.
 struct PairInfo {
 		int numKeypointsA = 0, numKeypointsB = 0;
 		int numMatches = 0, numInliers = 0;

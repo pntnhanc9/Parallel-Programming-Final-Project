@@ -141,10 +141,8 @@ int main(int argc, char **argv) {
 
 	// ---- report
 	printf("\nVersion %d | device: %s | image %dx%d | %d timed runs (+1 warm-up)\n",
-				 opt.version, deviceName(opt.version).c_str(), A.width, A.height,
-				 opt.runs);
-	printf("%-14s %11s %11s %11s %11s\n", "Stage", "avg (ms)", "min (ms)",
-				 "max (ms)", "std (ms)");
+				 opt.version, deviceName(opt.version).c_str(), A.width, A.height, opt.runs);
+	printf("%-14s %11s %11s %11s %11s\n", "Stage", "avg (ms)", "min (ms)", "max (ms)", "std (ms)");
 	std::vector<double> v(runs.size());
 	for (int s = 0; s < ST_COUNT; ++s) {
 		for (size_t r = 0; r < runs.size(); ++r)
