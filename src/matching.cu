@@ -1,6 +1,6 @@
 /*
  * File: matching.cu
- * Author: Phan Nhat Thien Nhan (Phase 4)
+ * Author: Nguyen Manh Cuong (Phase 4)
  * 
  * General Purpose:
  *   Brute-force binary descriptor matching between image A and image B:
@@ -37,12 +37,12 @@
  */
 static inline int popcount32(uint32_t x) {
 #if defined(__GNUC__) || defined(__clang__)
-    return __builtin_popcount(x);
+		return __builtin_popcount(x);
 #else
-    x = x - ((x >> 1) & 0x55555555u);
-    x = (x & 0x33333333u) + ((x >> 2) & 0x33333333u);
-    x = (x + (x >> 4)) & 0x0F0F0F0Fu;
-    return static_cast<int>((x * 0x01010101u) >> 24);
+		x = x - ((x >> 1) & 0x55555555u);
+		x = (x & 0x33333333u) + ((x >> 2) & 0x33333333u);
+		x = (x + (x >> 4)) & 0x0F0F0F0Fu;
+		return static_cast<int>((x * 0x01010101u) >> 24);
 #endif
 }
 
@@ -58,11 +58,11 @@ static inline int popcount32(uint32_t x) {
  *   - Total Hamming distance in [0, 256].
  */
 static inline int descriptorHammingDist(const Descriptor& a, const Descriptor& b) {
-    int dist = 0;
-    for (int w = 0; w < 8; ++w) {
-        dist += popcount32(a.w[w] ^ b.w[w]);
-    }
-    return dist;
+		int dist = 0;
+		for (int w = 0; w < 8; ++w) {
+				dist += popcount32(a.w[w] ^ b.w[w]);
+		}
+		return dist;
 }
 
 namespace v0 {
@@ -83,80 +83,80 @@ namespace v0 {
  *   - matches: Verified feature matches sorted by idxA ascending.
  */
 void matchDescriptors(const std::vector<Descriptor>& descA,
-                      const std::vector<Descriptor>& descB,
-                      const Params& p, std::vector<Match>& matches) {
-    matches.clear();
+											const std::vector<Descriptor>& descB,
+											const Params& p, std::vector<Match>& matches) {
+		matches.clear();
 
-    const int numA = static_cast<int>(descA.size());
-    const int numB = static_cast<int>(descB.size());
+		const int numA = static_cast<int>(descA.size());
+		const int numB = static_cast<int>(descB.size());
 
-    if (numA == 0 || numB < 2) {
-        return;
-    }
+		if (numA == 0 || numB < 2) {
+				return;
+		}
 
-    // =========================================================================
-    // Step 1: Brute-Force Hamming Search (A -> B) & Reverse Tracking (B -> A)
-    // =========================================================================
-    std::vector<int> bestDistBA;
-    std::vector<int> bestIdxAForB;
-    if (p.crossCheck) {
-        bestDistBA.assign(numB, std::numeric_limits<int>::max());
-        bestIdxAForB.assign(numB, -1);
-    }
+		// =========================================================================
+		// Step 1: Brute-Force Hamming Search (A -> B) & Reverse Tracking (B -> A)
+		// =========================================================================
+		std::vector<int> bestDistBA;
+		std::vector<int> bestIdxAForB;
+		if (p.crossCheck) {
+				bestDistBA.assign(numB, std::numeric_limits<int>::max());
+				bestIdxAForB.assign(numB, -1);
+		}
 
-    std::vector<Match> candidates;
-    candidates.reserve(numA);
+		std::vector<Match> candidates;
+		candidates.reserve(numA);
 
-    for (int i = 0; i < numA; ++i) {
-        int bestDist   = std::numeric_limits<int>::max();
-        int secondDist = std::numeric_limits<int>::max();
-        int bestIdxB   = -1;
+		for (int i = 0; i < numA; ++i) {
+				int bestDist   = std::numeric_limits<int>::max();
+				int secondDist = std::numeric_limits<int>::max();
+				int bestIdxB   = -1;
 
-        for (int j = 0; j < numB; ++j) {
-            int d = descriptorHammingDist(descA[i], descB[j]);
+				for (int j = 0; j < numB; ++j) {
+						int d = descriptorHammingDist(descA[i], descB[j]);
 
-            // Track 1st and 2nd nearest neighbors in B for A[i]
-            if (d < bestDist) {
-                secondDist = bestDist;
-                bestDist   = d;
-                bestIdxB   = j;
-            } else if (d < secondDist) {
-                secondDist = d;
-            }
+						// Track 1st and 2nd nearest neighbors in B for A[i]
+						if (d < bestDist) {
+								secondDist = bestDist;
+								bestDist   = d;
+								bestIdxB   = j;
+						} else if (d < secondDist) {
+								secondDist = d;
+						}
 
-            // Simultaneously track nearest neighbor in A for B[j] (for cross-check)
-            if (p.crossCheck && d < bestDistBA[j]) {
-                bestDistBA[j]   = d;
-                bestIdxAForB[j] = i;
-            }
-        }
+						// Simultaneously track nearest neighbor in A for B[j] (for cross-check)
+						if (p.crossCheck && d < bestDistBA[j]) {
+								bestDistBA[j]   = d;
+								bestIdxAForB[j] = i;
+						}
+				}
 
-        // Lowe's ratio test: keep only distinctive matches
-        if (bestIdxB >= 0 &&
-            static_cast<float>(bestDist) < p.ratioThresh * static_cast<float>(secondDist)) {
-            Match m;
-            m.idxA = i;
-            m.idxB = bestIdxB;
-            m.dist = bestDist;
-            candidates.push_back(m);
-        }
-    }
+				// Lowe's ratio test: keep only distinctive matches
+				if (bestIdxB >= 0 &&
+						static_cast<float>(bestDist) < p.ratioThresh * static_cast<float>(secondDist)) {
+						Match m;
+						m.idxA = i;
+						m.idxB = bestIdxB;
+						m.dist = bestDist;
+						candidates.push_back(m);
+				}
+		}
 
-    // =========================================================================
-    // Step 2: Optional Mutual Nearest-Neighbor Cross-Check Filter
-    // =========================================================================
-    if (!p.crossCheck) {
-        matches = std::move(candidates);
-        return;
-    }
+		// =========================================================================
+		// Step 2: Optional Mutual Nearest-Neighbor Cross-Check Filter
+		// =========================================================================
+		if (!p.crossCheck) {
+				matches = std::move(candidates);
+				return;
+		}
 
-    matches.reserve(candidates.size());
-    for (size_t k = 0; k < candidates.size(); ++k) {
-        const Match& m = candidates[k];
-        if (bestIdxAForB[m.idxB] == m.idxA) {
-            matches.push_back(m);
-        }
-    }
+		matches.reserve(candidates.size());
+		for (size_t k = 0; k < candidates.size(); ++k) {
+				const Match& m = candidates[k];
+				if (bestIdxAForB[m.idxB] == m.idxA) {
+						matches.push_back(m);
+				}
+		}
 }
 
 } // namespace v0

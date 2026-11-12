@@ -42,9 +42,9 @@ constexpr int NUM_BRIEF_PAIRS = 256;
  *   - Next 32-bit unsigned pseudo-random integer.
  */
 static inline uint32_t lcgNext(uint32_t& state) {
-    // Numerical Recipes / 64-bit LCG constants
-    state = state * 1664525u + 1013904223u;
-    return state;
+		// Numerical Recipes / 64-bit LCG constants
+		state = state * 1664525u + 1013904223u;
+		return state;
 }
 
 namespace v0 {
@@ -61,29 +61,29 @@ namespace v0 {
  *   - Pointer to an array of 256 BriefPair elements.
  */
 const BriefPair* briefPattern(const Params& p) {
-    static BriefPair pattern[NUM_BRIEF_PAIRS];
-    static int cachedSeed = -1;
+		static BriefPair pattern[NUM_BRIEF_PAIRS];
+		static int cachedSeed = -1;
 
-    if (cachedSeed == p.briefSeed) {
-        return pattern;
-    }
+		if (cachedSeed == p.briefSeed) {
+				return pattern;
+		}
 
-    uint32_t state = static_cast<uint32_t>(p.briefSeed);
-    int radius = p.patchRadius;
-    int diameter = 2 * radius + 1;
+		uint32_t state = static_cast<uint32_t>(p.briefSeed);
+		int radius = p.patchRadius;
+		int diameter = 2 * radius + 1;
 
-    for (int i = 0; i < NUM_BRIEF_PAIRS; ++i) {
-        // Sample offsets uniformly in [-radius, radius]
-        int8_t x1 = static_cast<int8_t>(static_cast<int>(lcgNext(state) % diameter) - radius);
-        int8_t y1 = static_cast<int8_t>(static_cast<int>(lcgNext(state) % diameter) - radius);
-        int8_t x2 = static_cast<int8_t>(static_cast<int>(lcgNext(state) % diameter) - radius);
-        int8_t y2 = static_cast<int8_t>(static_cast<int>(lcgNext(state) % diameter) - radius);
+		for (int i = 0; i < NUM_BRIEF_PAIRS; ++i) {
+				// Sample offsets uniformly in [-radius, radius]
+				int8_t x1 = static_cast<int8_t>(static_cast<int>(lcgNext(state) % diameter) - radius);
+				int8_t y1 = static_cast<int8_t>(static_cast<int>(lcgNext(state) % diameter) - radius);
+				int8_t x2 = static_cast<int8_t>(static_cast<int>(lcgNext(state) % diameter) - radius);
+				int8_t y2 = static_cast<int8_t>(static_cast<int>(lcgNext(state) % diameter) - radius);
 
-        pattern[i] = BriefPair{x1, y1, x2, y2};
-    }
+				pattern[i] = BriefPair{x1, y1, x2, y2};
+		}
 
-    cachedSeed = p.briefSeed;
-    return pattern;
+		cachedSeed = p.briefSeed;
+		return pattern;
 }
 
 /*
@@ -102,36 +102,36 @@ const BriefPair* briefPattern(const Params& p) {
  *   - true if the patch is valid and angle is computed, false if out-of-bounds.
  */
 static bool computeKeypointAngle(const GrayImage& blurred, int cx, int cy, int radius, float& angle) {
-    int width = blurred.width;
-    int height = blurred.height;
+		int width = blurred.width;
+		int height = blurred.height;
 
-    // Reject keypoints whose circular patch would exceed image borders
-    if (cx - radius < 0 || cx + radius >= width ||
-        cy - radius < 0 || cy + radius >= height) {
-        return false;
-    }
+		// Reject keypoints whose circular patch would exceed image borders
+		if (cx - radius < 0 || cx + radius >= width ||
+				cy - radius < 0 || cy + radius >= height) {
+				return false;
+		}
 
-    float m10 = 0.0f; // Moment along X
-    float m01 = 0.0f; // Moment along Y
-    int radiusSq = radius * radius;
+		float m10 = 0.0f; // Moment along X
+		float m01 = 0.0f; // Moment along Y
+		int radiusSq = radius * radius;
 
-    for (int v = -radius; v <= radius; ++v) {
-        int py = cy + v;
-        int rowOffset = py * width;
+		for (int v = -radius; v <= radius; ++v) {
+				int py = cy + v;
+				int rowOffset = py * width;
 
-        for (int u = -radius; u <= radius; ++u) {
-            if (u * u + v * v <= radiusSq) {
-                int px = cx + u;
-                float intensity = blurred.data[rowOffset + px];
+				for (int u = -radius; u <= radius; ++u) {
+						if (u * u + v * v <= radiusSq) {
+								int px = cx + u;
+								float intensity = blurred.data[rowOffset + px];
 
-                m10 += static_cast<float>(u) * intensity;
-                m01 += static_cast<float>(v) * intensity;
-            }
-        }
-    }
+								m10 += static_cast<float>(u) * intensity;
+								m01 += static_cast<float>(v) * intensity;
+						}
+				}
+		}
 
-    angle = std::atan2(m01, m10);
-    return true;
+		angle = std::atan2(m01, m10);
+		return true;
 }
 
 /*
@@ -150,50 +150,50 @@ static bool computeKeypointAngle(const GrayImage& blurred, int cx, int cy, int r
  *   - true if all 256 rotated sample pairs fall inside the image, false otherwise.
  */
 static bool extractRotatedBrief(const GrayImage& blurred, int cx, int cy, float angle,
-                               const BriefPair* pattern, Descriptor& desc) {
-    int width = blurred.width;
-    int height = blurred.height;
+															 const BriefPair* pattern, Descriptor& desc) {
+		int width = blurred.width;
+		int height = blurred.height;
 
-    float cosAngle = std::cos(angle);
-    float sinAngle = std::sin(angle);
+		float cosAngle = std::cos(angle);
+		float sinAngle = std::sin(angle);
 
-    for (int w = 0; w < 8; ++w) {
-        desc.w[w] = 0;
-    }
+		for (int w = 0; w < 8; ++w) {
+				desc.w[w] = 0;
+		}
 
-    for (int i = 0; i < NUM_BRIEF_PAIRS; ++i) {
-        const BriefPair& pair = pattern[i];
+		for (int i = 0; i < NUM_BRIEF_PAIRS; ++i) {
+				const BriefPair& pair = pattern[i];
 
-        // Rotate point 1 by keypoint angle
-        float rx1 = static_cast<float>(pair.x1) * cosAngle - static_cast<float>(pair.y1) * sinAngle;
-        float ry1 = static_cast<float>(pair.x1) * sinAngle + static_cast<float>(pair.y1) * cosAngle;
-        int p1x = cx + static_cast<int>(std::round(rx1));
-        int p1y = cy + static_cast<int>(std::round(ry1));
+				// Rotate point 1 by keypoint angle
+				float rx1 = static_cast<float>(pair.x1) * cosAngle - static_cast<float>(pair.y1) * sinAngle;
+				float ry1 = static_cast<float>(pair.x1) * sinAngle + static_cast<float>(pair.y1) * cosAngle;
+				int p1x = cx + static_cast<int>(std::round(rx1));
+				int p1y = cy + static_cast<int>(std::round(ry1));
 
-        // Rotate point 2 by keypoint angle
-        float rx2 = static_cast<float>(pair.x2) * cosAngle - static_cast<float>(pair.y2) * sinAngle;
-        float ry2 = static_cast<float>(pair.x2) * sinAngle + static_cast<float>(pair.y2) * cosAngle;
-        int p2x = cx + static_cast<int>(std::round(rx2));
-        int p2y = cy + static_cast<int>(std::round(ry2));
+				// Rotate point 2 by keypoint angle
+				float rx2 = static_cast<float>(pair.x2) * cosAngle - static_cast<float>(pair.y2) * sinAngle;
+				float ry2 = static_cast<float>(pair.x2) * sinAngle + static_cast<float>(pair.y2) * cosAngle;
+				int p2x = cx + static_cast<int>(std::round(rx2));
+				int p2y = cy + static_cast<int>(std::round(ry2));
 
-        // Boundary safety check for both sample points
-        if (p1x < 0 || p1x >= width || p1y < 0 || p1y >= height ||
-            p2x < 0 || p2x >= width || p2y < 0 || p2y >= height) {
-            return false;
-        }
+				// Boundary safety check for both sample points
+				if (p1x < 0 || p1x >= width || p1y < 0 || p1y >= height ||
+						p2x < 0 || p2x >= width || p2y < 0 || p2y >= height) {
+						return false;
+				}
 
-        float val1 = blurred.data[p1y * width + p1x];
-        float val2 = blurred.data[p2y * width + p2x];
+				float val1 = blurred.data[p1y * width + p1x];
+				float val2 = blurred.data[p2y * width + p2x];
 
-        // Set bit i to 1 if intensity(p1) < intensity(p2)
-        if (val1 < val2) {
-            int wordIdx = i / 32;
-            int bitIdx = i % 32;
-            desc.w[wordIdx] |= (1u << bitIdx);
-        }
-    }
+				// Set bit i to 1 if intensity(p1) < intensity(p2)
+				if (val1 < val2) {
+						int wordIdx = i / 32;
+						int bitIdx = i % 32;
+						desc.w[wordIdx] |= (1u << bitIdx);
+				}
+		}
 
-    return true;
+		return true;
 }
 
 /*
@@ -212,46 +212,46 @@ static bool extractRotatedBrief(const GrayImage& blurred, int cx, int cy, float 
  *   - desc: Output descriptors vector aligned with kps.
  */
 void computeDescriptors(const GrayImage& blurred, const Params& p,
-                        std::vector<Keypoint>& kps, std::vector<Descriptor>& desc) {
-    desc.clear();
+												std::vector<Keypoint>& kps, std::vector<Descriptor>& desc) {
+		desc.clear();
 
-    if (blurred.empty() || kps.empty()) {
-        kps.clear();
-        return;
-    }
+		if (blurred.empty() || kps.empty()) {
+				kps.clear();
+				return;
+		}
 
-    const BriefPair* pattern = briefPattern(p);
+		const BriefPair* pattern = briefPattern(p);
 
-    std::vector<Keypoint> validKps;
-    std::vector<Descriptor> validDesc;
-    validKps.reserve(kps.size());
-    validDesc.reserve(kps.size());
+		std::vector<Keypoint> validKps;
+		std::vector<Descriptor> validDesc;
+		validKps.reserve(kps.size());
+		validDesc.reserve(kps.size());
 
-    for (size_t i = 0; i < kps.size(); ++i) {
-        Keypoint kp = kps[i];
-        int cx = static_cast<int>(std::round(kp.x));
-        int cy = static_cast<int>(std::round(kp.y));
+		for (size_t i = 0; i < kps.size(); ++i) {
+				Keypoint kp = kps[i];
+				int cx = static_cast<int>(std::round(kp.x));
+				int cy = static_cast<int>(std::round(kp.y));
 
-        float angle = 0.0f;
-        // Step 1: Compute dominant orientation
-        if (!computeKeypointAngle(blurred, cx, cy, p.patchRadius, angle)) {
-            continue; // Cannot compute angle safely near boundary
-        }
-        kp.angle = angle;
+				float angle = 0.0f;
+				// Step 1: Compute dominant orientation
+				if (!computeKeypointAngle(blurred, cx, cy, p.patchRadius, angle)) {
+						continue; // Cannot compute angle safely near boundary
+				}
+				kp.angle = angle;
 
-        // Step 2: Extract rotated BRIEF descriptor
-        Descriptor d;
-        if (!extractRotatedBrief(blurred, cx, cy, kp.angle, pattern, d)) {
-            continue; // Rotated sample points fell outside the image
-        }
+				// Step 2: Extract rotated BRIEF descriptor
+				Descriptor d;
+				if (!extractRotatedBrief(blurred, cx, cy, kp.angle, pattern, d)) {
+						continue; // Rotated sample points fell outside the image
+				}
 
-        validKps.push_back(kp);
-        validDesc.push_back(d);
-    }
+				validKps.push_back(kp);
+				validDesc.push_back(d);
+		}
 
-    // Keep kps and desc strictly aligned
-    kps = std::move(validKps);
-    desc = std::move(validDesc);
+		// Keep kps and desc strictly aligned
+		kps = std::move(validKps);
+		desc = std::move(validDesc);
 }
 
 } // namespace v0

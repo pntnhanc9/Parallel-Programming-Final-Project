@@ -48,7 +48,7 @@ struct CpuTimer {
 	std::chrono::high_resolution_clock::time_point t0;
 	void start() { t0 = std::chrono::high_resolution_clock::now(); }
 	double stopMs() const {
-    	return std::chrono::duration<double, std::milli>(std::chrono::high_resolution_clock::now() - t0).count();
+			return std::chrono::duration<double, std::milli>(std::chrono::high_resolution_clock::now() - t0).count();
 	}
 };
 

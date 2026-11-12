@@ -35,22 +35,22 @@
  *   - kernel: Output vector containing normalized float weights summing to 1.0f.
  */
 static void generateGaussianKernel1d(float sigma, int radius, std::vector<float>& kernel) {
-    int kernelSize = 2 * radius + 1;
-    kernel.resize(kernelSize);
+		int kernelSize = 2 * radius + 1;
+		kernel.resize(kernelSize);
 
-    float sum = 0.0f;
-    float twoSigmaSquare = 2.0f * sigma * sigma;
+		float sum = 0.0f;
+		float twoSigmaSquare = 2.0f * sigma * sigma;
 
-    for (int k = -radius; k <= radius; ++k) {
-        float weight = std::exp(-static_cast<float>(k * k) / twoSigmaSquare);
-        kernel[k + radius] = weight;
-        sum += weight;
-    }
+		for (int k = -radius; k <= radius; ++k) {
+				float weight = std::exp(-static_cast<float>(k * k) / twoSigmaSquare);
+				kernel[k + radius] = weight;
+				sum += weight;
+		}
 
-    // Normalize weights to sum to 1.0 (preserves overall image brightness)
-    for (int i = 0; i < kernelSize; ++i) {
-        kernel[i] /= sum;
-    }
+		// Normalize weights to sum to 1.0 (preserves overall image brightness)
+		for (int i = 0; i < kernelSize; ++i) {
+				kernel[i] /= sum;
+		}
 }
 
 namespace v0 {
@@ -69,68 +69,68 @@ namespace v0 {
  *   - blurred: Output smoothed GrayImage (single channel float, row-major).
  */
 void preprocess(const Image& rgb, const Params& p, GrayImage& blurred) {
-    int width = rgb.width;
-    int height = rgb.height;
+		int width = rgb.width;
+		int height = rgb.height;
 
-    blurred.width = width;
-    blurred.height = height;
-    blurred.data.clear();
+		blurred.width = width;
+		blurred.height = height;
+		blurred.data.clear();
 
-    if (width <= 0 || height <= 0 || rgb.data.empty()) {
-        return;
-    }
+		if (width <= 0 || height <= 0 || rgb.data.empty()) {
+				return;
+		}
 
-    blurred.data.resize(width * height);
+		blurred.data.resize(width * height);
 
-    // =========================================================================
-    // Step 1: Convert RGB to Grayscale (Float)
-    // Formula (ITU-R BT.601): Gray = 0.299*R + 0.587*G + 0.114*B
-    // =========================================================================
-    std::vector<float> gray(width * height);
+		// =========================================================================
+		// Step 1: Convert RGB to Grayscale (Float)
+		// Formula (ITU-R BT.601): Gray = 0.299*R + 0.587*G + 0.114*B
+		// =========================================================================
+		std::vector<float> gray(width * height);
 
-    for (int r = 0; r < height; ++r) {
-        for (int c = 0; c < width; ++c) {
-            int rgbIdx = (r * width + c) * 3;
-            float redVal   = static_cast<float>(rgb.data[rgbIdx + 0]);
-            float greenVal = static_cast<float>(rgb.data[rgbIdx + 1]);
-            float blueVal  = static_cast<float>(rgb.data[rgbIdx + 2]);
+		for (int r = 0; r < height; ++r) {
+				for (int c = 0; c < width; ++c) {
+						int rgbIdx = (r * width + c) * 3;
+						float redVal   = static_cast<float>(rgb.data[rgbIdx + 0]);
+						float greenVal = static_cast<float>(rgb.data[rgbIdx + 1]);
+						float blueVal  = static_cast<float>(rgb.data[rgbIdx + 2]);
 
-            gray[r * width + c] = 0.299f * redVal + 0.587f * greenVal + 0.114f * blueVal;
-        }
-    }
+						gray[r * width + c] = 0.299f * redVal + 0.587f * greenVal + 0.114f * blueVal;
+				}
+		}
 
-    // =========================================================================
-    // Step 2: Separable Gaussian Blur (2 passes of 1D convolution)
-    // =========================================================================
-    std::vector<float> kernel;
-    generateGaussianKernel1d(p.blurSigma, p.blurRadius, kernel);
-    int radius = p.blurRadius;
+		// =========================================================================
+		// Step 2: Separable Gaussian Blur (2 passes of 1D convolution)
+		// =========================================================================
+		std::vector<float> kernel;
+		generateGaussianKernel1d(p.blurSigma, p.blurRadius, kernel);
+		int radius = p.blurRadius;
 
-    // 2a. Pass 1 (Horizontal): convolve along rows into temporary buffer
-    std::vector<float> tempBuffer(width * height);
+		// 2a. Pass 1 (Horizontal): convolve along rows into temporary buffer
+		std::vector<float> tempBuffer(width * height);
 
-    for (int r = 0; r < height; ++r) {
-        for (int c = 0; c < width; ++c) {
-            float sum = 0.0f;
-            for (int k = -radius; k <= radius; ++k) {
-                int sampleCol = clampInt(c + k, 0, width - 1);
-                sum += gray[r * width + sampleCol] * kernel[k + radius];
-            }
-            tempBuffer[r * width + c] = sum;
-        }
-    }
+		for (int r = 0; r < height; ++r) {
+				for (int c = 0; c < width; ++c) {
+						float sum = 0.0f;
+						for (int k = -radius; k <= radius; ++k) {
+								int sampleCol = clampInt(c + k, 0, width - 1);
+								sum += gray[r * width + sampleCol] * kernel[k + radius];
+						}
+						tempBuffer[r * width + c] = sum;
+				}
+		}
 
-    // 2b. Pass 2 (Vertical): convolve along columns into blurred.data
-    for (int r = 0; r < height; ++r) {
-        for (int c = 0; c < width; ++c) {
-            float sum = 0.0f;
-            for (int k = -radius; k <= radius; ++k) {
-                int sampleRow = clampInt(r + k, 0, height - 1);
-                sum += tempBuffer[sampleRow * width + c] * kernel[k + radius];
-            }
-            blurred.data[r * width + c] = sum;
-        }
-    }
+		// 2b. Pass 2 (Vertical): convolve along columns into blurred.data
+		for (int r = 0; r < height; ++r) {
+				for (int c = 0; c < width; ++c) {
+						float sum = 0.0f;
+						for (int k = -radius; k <= radius; ++k) {
+								int sampleRow = clampInt(r + k, 0, height - 1);
+								sum += tempBuffer[sampleRow * width + c] * kernel[k + radius];
+						}
+						blurred.data[r * width + c] = sum;
+				}
+		}
 }
 
 } // namespace v0

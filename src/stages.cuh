@@ -1,6 +1,6 @@
 /*
  * File: stages.cuh
- * Authors: <TODO: names / student IDs>
+ * Authors: Nguyen Hoang Minh Tam, Nguyen Manh Cuong, Phan Nhat Thien Nhan
  * External sources: none
  *
  * THE CONTRACT between team members: one function declaration per pipeline stage.
@@ -30,7 +30,7 @@ void preprocess(const Image &rgb, const Params &p, GrayImage &blurred);
 // score descending, ties broken by (y, x) ascending (determinism). Fills x, y,
 // score. (angle is filled by stage 3.)
 void detectKeypoints(const GrayImage &blurred, const Params &p,
-                     std::vector<Keypoint> &kps);
+										 std::vector<Keypoint> &kps);
 
 // ---- Stage 3: describe.cu
 // ---------------------------------------------------- Computes kps[i].angle
@@ -38,8 +38,8 @@ void detectKeypoints(const GrayImage &blurred, const Params &p,
 // descriptor for each keypoint. Keypoints that cannot be described are REMOVED
 // from kps, so kps[i] <-> desc[i] always stay aligned.
 void computeDescriptors(const GrayImage &blurred, const Params &p,
-                        std::vector<Keypoint> &kps,
-                        std::vector<Descriptor> &desc);
+												std::vector<Keypoint> &kps,
+												std::vector<Descriptor> &desc);
 
 // The fixed 256-pair BRIEF pattern, generated once from p.briefSeed with an own
 // PRNG. Shared by every version (V1+ copies it to constant memory).
@@ -50,8 +50,8 @@ const BriefPair *briefPattern(const Params &p); // returns 256 pairs
 // nearest neighbour A->B, Lowe ratio test (p.ratioThresh), optional cross-check
 // (p.crossCheck). Output sorted by idxA ascending.
 void matchDescriptors(const std::vector<Descriptor> &descA,
-                      const std::vector<Descriptor> &descB, const Params &p,
-                      std::vector<Match> &matches);
+											const std::vector<Descriptor> &descB, const Params &p,
+											std::vector<Match> &matches);
 
 // ---- Stage 5: homography.cu
 // -------------------------------------------------- Pre-generates
@@ -59,17 +59,17 @@ void matchDescriptors(const std::vector<Descriptor> &descA,
 // 4*ransacIters. Every version must call this, so all versions test the very
 // same hypotheses.
 void generateRansacSamples(int numMatches, const Params &p,
-                           std::vector<int> &samples);
+													 std::vector<int> &samples);
 
 // RANSAC with 4-point DLT. H maps B -> A. inlierMask[i] = 1 if matches[i] is an
 // inlier. If p.refitInliers, H is re-estimated from all inliers. Tie on inlier
 // count -> lowest iteration index wins. Returns false if fewer than
 // p.minInliers inliers are found.
 bool estimateHomography(const std::vector<Keypoint> &kpsA,
-                        const std::vector<Keypoint> &kpsB,
-                        const std::vector<Match> &matches, const Params &p,
-                        Homography &H, std::vector<uint8_t> &inlierMask,
-                        int &numInliers);
+												const std::vector<Keypoint> &kpsB,
+												const std::vector<Match> &matches, const Params &p,
+												Homography &H, std::vector<uint8_t> &inlierMask,
+												int &numInliers);
 
 // ---- Stage 6: warp.cu
 // -------------------------------------------------------- Canvas = bounding
@@ -77,6 +77,6 @@ bool estimateHomography(const std::vector<Keypoint> &kpsA,
 // A copied in place, feathering in the overlap if p.feather. Pixels covered by
 // neither image are black.
 bool warpAndBlend(const Image &A, const Image &B, const Homography &H_BtoA,
-                  const Params &p, Image &panorama);
+									const Params &p, Image &panorama);
 
 } // namespace v0
