@@ -1,9 +1,12 @@
-// types.cuh -- shared data types and parameters for ALL versions (V0, V1, ...).
-// Authors: <TODO: names / student IDs>
-// External sources: none
-//
-// Plain C++ only (no CUDA includes) so that V0 stays a pure CPU baseline.
-// Changing a struct here affects every module: discuss with the team first.
+/*
+ * File: types.cuh
+ * Authors: <TODO: names / student IDs>
+ * External sources: none
+ *
+ * Shared data types and pipeline parameters used by ALL versions (V0, V1, ...).
+ * Plain C++ only -- no CUDA includes -- so V0 stays a pure CPU baseline.
+ * Changing a struct here affects every module: discuss with the team first.
+ */
 #pragma once
 #include <cstdint>
 #include <vector>

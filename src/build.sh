@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # build.sh -- build the `stitch` program from every .cu / .cpp file in src/.
 #
-#   bash build.sh           build ./stitch (next to this script)
-#   bash build.sh clean     remove the binary
+# 	bash build.sh           build ./stitch (next to this script)
+# 	bash build.sh clean     remove the binary
 #
 # Optional environment variables
-#   OUT=<path>          output binary          (default: <script dir>/stitch)
-#   CUDA_ARCH=<arch>    e.g. sm_75 (T4), sm_86, native; passed to nvcc as
+# 	OUT=<path>          output binary          (default: <script dir>/stitch)
+# 	CUDA_ARCH=<arch>    e.g. sm_75 (T4), sm_86, native; passed to nvcc as
 #                       -arch=. Unset = nvcc default.
-#   OPT=<flags>         optimisation flags     (default: -O2)
+# 	OPT=<flags>         optimisation flags     (default: -O2)
 #
 # The same flags are used for every version; no -ffast-math nor -march=native,
 # so the CPU baseline does not silently depend on the host.
@@ -18,9 +18,9 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 OUT="${OUT:-$PWD/stitch}"
 
 if [[ "${1:-}" == "clean" ]]; then
-  rm -f "$OUT"
-  echo "[build] removed $OUT"
-  exit 0
+	rm -f "$OUT"
+	echo "[build] removed $OUT"
+	exit 0
 fi
 
 SRC_FILES=(*.cu *.cpp)

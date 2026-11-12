@@ -1,8 +1,12 @@
-// utils.cu -- CLI parsing, image I/O, evaluation helpers (pure C++, no CUDA
-// calls).
-// Authors: <TODO: names / student IDs>
-// External sources: stb_image.h / stb_image_write.h (public domain, Sean
-//                   Barrett, https://github.com/nothings/stb).
+/*
+ * File: utils.cu
+ * Authors: <TODO: names / student IDs>
+ * External sources: stb_image.h / stb_image_write.h (public domain, Sean
+ *                   Barrett, https://github.com/nothings/stb).
+ *
+ * Implementation of utils.cuh: CLI parsing, image I/O, and evaluation helpers.
+ * Pure C++ -- no CUDA calls.
+ */
 #include "utils.cuh"
 #include "stb_image.h" // declarations only; implementation is in stb_impl.cpp
 #include "stb_image_write.h"

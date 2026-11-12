@@ -1,11 +1,14 @@
-// main.cu -- entry point: parse CLI, load the two images, run the selected
-// pipeline version (1 warm-up + N timed runs), print per-stage and end-to-end
-// timing, save the panorama.
-//
-//   ./stitch <left_image> <right_image> <output_image> --version 0 [--runs N]
-//
-// Authors: <TODO: names / student IDs>
-// External sources: none
+/*
+ * File: main.cu
+ * Authors: <TODO: names / student IDs>
+ * External sources: none
+ *
+ * Entry point: parse CLI, load the two images, run the selected pipeline
+ * version (1 warm-up + N timed runs), print per-stage and end-to-end timing,
+ * and save the panorama.
+ *
+ *   ./stitch <left_image> <right_image> <output_image> --version 0 [--runs N]
+ */
 #include "stages.cuh"
 #include "utils.cuh"
 #include <algorithm>
@@ -126,7 +129,7 @@ int main(int argc, char **argv) {
   // ---- load (excluded from timing)
   Image A, B;
   if (!loadImage(opt.leftPath, A) || !loadImage(opt.rightPath, B))
-    return 1;
+      return 1;
   printf("Loaded A: %s (%dx%d)\n", opt.leftPath.c_str(), A.width, A.height);
   printf("Loaded B: %s (%dx%d)\n", opt.rightPath.c_str(), B.width, B.height);
 

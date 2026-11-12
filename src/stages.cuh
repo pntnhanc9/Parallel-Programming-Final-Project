@@ -1,17 +1,17 @@
-// stages.h -- THE CONTRACT between team members: one function per pipeline
-// stage. Authors: <TODO: names / student IDs> External sources: none
-//
-// Rules
-//  * Each stage lives in its own file (see comment) and may be developed/tested
-//  alone.
-//  * V0 = namespace v0, plain single-thread C++ (no OpenMP / std::thread / SIMD
-//  / CUDA).
-//  * Later versions (v1, v2, ...) will get their own namespaces with the same
-//  stage split.
-//  * All parameters come from Params; never hard-code a constant inside a
-//  stage.
-//  * Stages must be deterministic: no time-based seeds, no std::*_distribution
-//    (its output differs between compilers) -> use a tiny own xorshift/LCG.
+/*
+ * File: stages.cuh
+ * Authors: <TODO: names / student IDs>
+ * External sources: none
+ *
+ * THE CONTRACT between team members: one function declaration per pipeline stage.
+ * Rules:
+ *   - Each stage lives in its own .cu file and may be developed/tested alone.
+ *   - V0 = namespace v0, plain single-thread C++ (no OpenMP / std::thread / SIMD / CUDA).
+ *   - Later versions (v1, v2, ...) get their own namespaces with the same stage split.
+ *   - All parameters come from Params; never hard-code a constant inside a stage.
+ *   - Stages must be deterministic: no time-based seeds, no std::*_distribution
+ *     (output differs between compilers) -- use a custom xorshift/LCG instead.
+ */
 #pragma once
 #include "types.cuh"
 
